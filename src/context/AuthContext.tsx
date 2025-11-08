@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 import { AuthContextType, User } from "@/types";
 
 const AUTH_TOKEN_KEY = "auth_token";
@@ -12,29 +18,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const login = async (email, password) => {
+  const login = async (email: string, password: string) => {
     setLoading(true);
     try {
       setError(null);
-      const response = await fetch(
-        "https://auth-service-gear-head.vercel.app/auth/login",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        }
-      );
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: "Failed to login" }));
+        const errorData = await response
+          .json()
+          .catch(() => ({ message: "Failed to login" }));
         throw new Error(errorData.message);
       }
 
       const data = await response.json();
       localStorage.setItem(AUTH_TOKEN_KEY, data.token);
       await fetchUser(data.token);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to login");
     } finally {
       setLoading(false);
     }
@@ -47,7 +52,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchUser = async (token: string) => {
     try {
-      const response = await fetch("https://bff-mobile.vercel.app/auth/me", {
+      const response = await fetch("/api/auth/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -57,7 +62,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       const data = await response.json();
       setUser(data.user);
-    } catch (err) {
+    } catch {
       setUser(null);
       localStorage.removeItem(AUTH_TOKEN_KEY);
     }
