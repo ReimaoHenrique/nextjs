@@ -12,12 +12,12 @@ export default function AuthHandler({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, loading } = useAuth();
+  const { user, loading, error } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    if (loading) return;
+    if (loading || error) return;
 
     const isProtectedRoute = protectedRoutes.includes(pathname);
     const isPublicRoute = publicRoutes.includes(pathname);
@@ -27,7 +27,7 @@ export default function AuthHandler({
     } else if (user && isPublicRoute) {
       router.push("/profile");
     }
-  }, [user, loading, router, pathname]);
+  }, [user, loading, error, router, pathname]);
 
   if (loading || (!user && protectedRoutes.includes(pathname))) {
     return (
