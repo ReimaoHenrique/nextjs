@@ -12,10 +12,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const login = async (email, password) => {
+  const login = async (email: string, password: string) => {
     setLoading(true);
+    setError(null);
     try {
-      setError(null);
       const response = await fetch(
         "https://auth-service-gear-head.vercel.app/auth/login",
         {
@@ -26,7 +26,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       );
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: "Failed to login" }));
+        const errorData = await response.json().catch(() => ({ message: "Dados não encontrados" }));
         throw new Error(errorData.message);
       }
 
